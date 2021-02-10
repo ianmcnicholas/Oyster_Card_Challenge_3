@@ -4,7 +4,6 @@ MAXIMUM_AMOUNT = 90
 Minimum_amount = 1
 Minimum_fare = 1
 
-
   def initialize(topup_limit = MAXIMUM_AMOUNT)
     @balance = 0
     @maximum_amount = topup_limit
@@ -27,7 +26,7 @@ Minimum_fare = 1
   end
 
   def in_journey?
-    true if @entry_station != nil
+    !!@entry_station
   end
 end
 
