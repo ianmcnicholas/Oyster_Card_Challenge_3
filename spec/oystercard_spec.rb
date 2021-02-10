@@ -3,6 +3,7 @@ require 'oystercard'
 describe Oystercard do
 
   let(:entry_station) { double :entry_station }
+  let(:exit_station) { double :exit_station }
   let(:card) { Oystercard.new }
 
   it 'should have a balance of 0' do
@@ -35,32 +36,50 @@ describe Oystercard do
   it "deducts minimum fare from @balance when the user touches out" do
     card.top_up(Oystercard::Minimum_amount)
     card.touch_in(entry_station)
-    expect{card.touch_out}.to change{card.balance}.by(-(Oystercard::Minimum_fare))
+    expect{card.touch_out(exit_station)}.to change{card.balance}.by(-(Oystercard::Minimum_fare))
   end
 
-  it 'can touch in' do
-    card.top_up(Oystercard::Minimum_amount) 
-    expect { card.touch_in(entry_station) }.to change{card.in_journey?}.from(false).to(true)
-  end
+  # it 'can touch in' do
+  #   card.top_up(Oystercard::Minimum_amount)
+  #   expect { card.touch_in(entry_station) }.to change{card.in_journey?}.from(false).to(true)
+  # end
 
   it 'should not be in journey' do
     card.top_up(Oystercard::Minimum_amount)
     card.touch_in(entry_station)
-    card.touch_out
+    card.touch_out(exit_station)
     expect(card).not_to be_in_journey
   end
 
   it "remembers the entry station after the touch in" do
     card.top_up(Oystercard::Minimum_amount)
-    expect{ card.touch_in(entry_station) }.to change{card.entry_station}.to entry_station
+    expect{ card.touch_in(entry_station) }.to change{card.latest_journey[:entry]}.to entry_station
 
   end
 
   it "forgets the entry station on touch out" do
     card.top_up(Oystercard::Minimum_amount)
     card.touch_in(entry_station)
-    expect{ card.touch_out }.to change{card.entry_station}.to nil
-
+    expect{ card.touch_out(exit_station) }.to change{card.latest_journey[:entry]}.to nil
   end
+
+  it "remembers the exit station upon touch_out" do
+    card.top_up(Oystercard::Minimum_amount)
+    card.touch_in(entry_station)
+    card.touch_out(exit_station)
+    expect(card.journey_history.last[:exit]).to eq exit
+  end
+
+  it "has an emtpy list of journeys by default" do
+    expect(card.journey_history).to eq []
+  end
+
+  it "stores the most recent journey as a hash" do
+    card.top_up(Oystercard::Minimum_amount)
+    card.touch_in(entry_station)
+    card.touch_out(exit_station)
+    expect(card.journey_history).to eq [{ entry: entry_station, exit: exit_station }]
+  end
+
 
 end
