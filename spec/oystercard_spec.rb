@@ -5,6 +5,7 @@ describe Oystercard do
   let(:entry_station) { double :entry_station }
   let(:exit_station) { double :exit_station }
   let(:card) { Oystercard.new }
+  let(:journey) { {entry: entry_station, exit: exit_station} }
 
   it 'should have a balance of 0' do
     expect(card.balance).to eq 0
@@ -71,14 +72,14 @@ describe Oystercard do
   end
 
   it "has an emtpy list of journeys by default" do
-    expect(card.journey_history).to eq []
+    expect(card.journey_history).to be_empty
   end
 
   it "stores the most recent journey as a hash" do
     card.top_up(Oystercard::Minimum_amount)
     card.touch_in(entry_station)
     card.touch_out(exit_station)
-    expect(card.journey_history).to eq [{ entry: entry_station, exit: exit_station }]
+    expect(card.journey_history).to include journey
   end
 
 
